@@ -32,10 +32,6 @@ def main():
 def getKerningPairs():
     if args.glyphs:
         args.glyphs = args.glyphs.split('')
-        for char in args.glyphs:
-            whitespace = len(re.findall(r'\s', char))
-            if whitespace:
-                del args.glyphs[args.glyphs.index(char)]
         newKernTable = [ ]
         basicGlyphs = [ ]
         for glyph in args.glyphs:
@@ -45,4 +41,13 @@ def getKerningPairs():
             if left in basicGlyphs or right in basicGlyphs:
                 newKernTable.append([left, right, val])
         newKernTable = newKernTable.sort()
-        
+        for char in args.glyphs:
+            indivKernTable = [ ]
+            whitespace = len(re.findall(r'\s', char))
+            if whitespace:
+                del args.glyphs[args.glyphs.index(char)]
+                continue
+            indices = [index for index, sublist in enumerate(newKernTable) if unidecode(char) in sublist]
+            for index in indices:
+                indivKernTable.append(newKernTable[index])
+                

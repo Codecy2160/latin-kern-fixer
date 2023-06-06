@@ -13,6 +13,7 @@ args = parse.parse_args()
 font = TTFont(args.file)
 kern = font['kern']
 
+kernTables = { }
 latinChars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', \
               'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', \
               'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', \
@@ -30,24 +31,29 @@ def main():
     return
 
 def getKerningPairs():
-    if args.glyphs:
-        args.glyphs = args.glyphs.split('')
-        newKernTable = [ ]
-        basicGlyphs = [ ]
-        for glyph in args.glyphs:
-            if unidecode(glyph) not in basicGlyphs:
-                basicGlyphs.append(unidecode(glyph))
-        for left, right, val in kern.kernTable:
-            if left in basicGlyphs or right in basicGlyphs:
-                newKernTable.append([left, right, val])
-        newKernTable = newKernTable.sort()
-        for char in args.glyphs:
-            indivKernTable = [ ]
-            whitespace = len(re.findall(r'\s', char))
-            if whitespace:
-                del args.glyphs[args.glyphs.index(char)]
-                continue
-            indices = [index for index, sublist in enumerate(newKernTable) if unidecode(char) in sublist]
-            for index in indices:
-                indivKernTable.append(newKernTable[index])
-                
+    return
+
+
+def getKernTables(glyphs):
+    if type(glyphs) == str:
+        glyphs = glyphs.split('')
+    tempTables = [ ]
+    basicGlyphs = [ ]
+    for glyph in args.glyphs:
+        if unidecode(glyph) not in basicGlyphs:
+            basicGlyphs.append(unidecode(glyph))
+    for left, right, val in kern.kernTable:
+        if left in basicGlyphs or right in basicGlyphs:
+            tempTables.append([left, right, val])
+    tempTables = tempTables.sort()
+    for glyph in glyphs:
+        unidecoded = unidecode(glyph)
+        whitespace = len(re.findall(r'\s', glyph))
+        if whitespace:
+            continue
+        indices = [index for index, sublist in enumerate(tempTables) \
+                    if unidecoded in sublist]
+        for index in indices:
+            if not kernTables[f'{tempTables[index][0]}']:
+                kernTables[f'{tempTables[index][0]}'] = [ ]
+            kernTables[f'{tempTables[index][0]}'].append(tempTables[index])

@@ -14,32 +14,28 @@ font = TTFont(args.file)
 kern = font['kern']
 
 kernTables = { }
-latinChars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', \
-              'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', \
-              'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', \
-              'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', \
-              'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', \
+latinChars = ['À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', \
               'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ő', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', \
               'Ű', 'Ý', 'Þ', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', \
               'ë', 'ì', 'í', 'î', 'ï', 'ð', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ő', 'ø', 'ù', \
-              'ú', 'û', 'ü', 'ű', 'ý', 'þ', 'ÿ', \
-              '.', ',', '?', '!', ':', ';', "'", '"', '(', ')', '[', ']', '{', '}', \
-              '<', '>', '@', '#', '$', '%', '&', '*', '+', '-', '/', '=', '^', '_', \
-              '|', '~', '`']
+              'ú', 'û', 'ü', 'ű', 'ý', 'þ', 'ÿ']
 
 def main():
-    return
-
-def getKerningPairs():
-    return
-
+    glyphs = args.glyphs.split('') if args.glyphs else latinChars
+    getKernTables(glyphs)
+    for glyph in glyphs:
+        unidecoded = unidecode(glyph)
+        for item in kernTables[unidecoded]:
+            if item.index(unidecoded) == 0:
+                kern[(glyph, item[1])] = item[2]
+            elif item.index(unidecoded) == 1:
+                kern[(item[0], glyph)] = item[2]
+    font.save(f'{args.output}.ttf')
 
 def getKernTables(glyphs):
-    if type(glyphs) == str:
-        glyphs = glyphs.split('')
     tempTables = [ ]
     basicGlyphs = [ ]
-    for glyph in args.glyphs:
+    for glyph in glyphs:
         if unidecode(glyph) not in basicGlyphs:
             basicGlyphs.append(unidecode(glyph))
     for left, right, val in kern.kernTable:
@@ -57,3 +53,5 @@ def getKernTables(glyphs):
             if not kernTables[f'{tempTables[index][0]}']:
                 kernTables[f'{tempTables[index][0]}'] = [ ]
             kernTables[f'{tempTables[index][0]}'].append(tempTables[index])
+        
+main()
